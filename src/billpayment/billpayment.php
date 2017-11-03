@@ -13,8 +13,6 @@ class BillPayment
 	
     public static function pay( $serviceType, $accNo )
 	{    
-		DBConnection::restore();
-		
 		//	It's stub.
         //$account = ServiceAuthenticationStub::accountAuthenticationProvider( $accNo );
 		$account = ServiceAuthentication::accountAuthenticationProvider( $accNo );
@@ -44,15 +42,18 @@ class BillPayment
             throw new BillingException("You don't have a bill to pay");
         }
         
-		DBConnection::saveTransaction($accNo, ($account['accBalance']-$amount));
+        DBConnection::saveTransaction($accNo, ($account['accBalance']-$amount));
+        Charge::clearCharge($accNo, $serviceType);
 		
 		$account = ServiceAuthentication::accountAuthenticationProvider($accNo); 
-		
-		DBConnection::restore();
 		
 		echo $account['accBalance'];
 		
         return $account;
+    }
+    public function resetDatabase()
+    {
+        DBConnection::restore();           
     }
 }
 ?>
