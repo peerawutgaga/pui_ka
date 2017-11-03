@@ -8,7 +8,11 @@ class Charge{
 	{		
 		$account = DBConnection::getCharge($accountNumber, $serviceType);		
 		return $account;
-    }
+	}
+	public static function clearCharge($accountNumber, $serviceType)
+	{
+		DBConnection::clearCharge($accountNumber, $serviceType);
+	}
 }
 
 ?>
