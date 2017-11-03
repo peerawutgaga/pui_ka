@@ -151,4 +151,34 @@ class DBConnection {
         return $result;
     }
 
+    public static function clearCharge($accNo, $type)
+    {
+        $con = DBConnection::getInstance();
+        $stmt = null;
+        $clr = 0;
+
+        if (ServiceType::ELECTRIC_BILLING == $type) {
+            $stmt = $con->prepare(
+                "UPDATE ACCOUNT SET electricCharge = 0 WHERE no = :accNo"
+            );
+        }
+        elseif (ServiceType::WATER_BILLING == $type) {
+            $stmt = $con->prepare(
+                "UPDATE ACCOUNT SET waterCharge = 0 WHERE no = :accNo"
+            );
+        }
+        elseif (ServiceType::PHONE_BILLING == $type) {
+            $stmt = $con->prepare(
+                "UPDATE ACCOUNT SET phoneCharge = 0 WHERE no = :accNo"
+            );
+        }
+        if(null == $stmt) {
+            throw new BillingException("Unknow billing type.");
+        }
+        $stmt->execute([
+            ':accNo' => $accNo
+            ]);
+        
+    }
+
 }
