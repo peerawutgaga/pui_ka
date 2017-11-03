@@ -7,7 +7,9 @@
     require_once(__DIR__.'../../serviceauthentication/serviceauthentication.php');
     require_once(__DIR__.'../../serviceauthentication/DBConnection.php');
 
+    use Database\MySQL;
     use Output\Outputs;
+    use ServiceAuthenticationStub;
     use Exception;
     use AccountInformationException;
     use serviceauthentication;
@@ -26,43 +28,38 @@
             $canDeposit = true;
             $result = new Outputs();
 
+            #บริการฝากเงินเข้าบัญชีโดยต้องตรวจสอบหมายเลขบัญชีและจำนวนเงินฝาก คือ
+            # จำนวนเงินฝากต้องเป็นตัวเลขเท่านั้น
+            if (!is_numeric($depositAmount))
+            {
+                $result->errorMessage = 'จำนวนเงินฝากต้องเป็นตัวเลขเท่านั้น';
+                $canDeposit = false;
+            }
+            else
+            {
+                $depositAmount = (int)$depositAmount;
+            }
+
+            # จำนวนเงินฝากต้องมากกว่า 0
+            if (($depositAmount <= 0) && $canDeposit)
+            {
+                $result->errorMessage = 'จำนวนเงินฝากต้องมากกว่า 0 บาท';
+                $canDeposit = false;
+            }
+
+            # จำนวนเงินฝากต้องไม่เกิน 100,000 บาท
+            if (($depositAmount > 100000) && $canDeposit)
+            {
+                $result->errorMessage = 'จำนวนเงินฝากในแต่ละครั้งต้องไม่เกิน 100,000 บาท';
+                $canDeposit = false;
+            }
+
             try
             {
-                #บริการฝากเงินเข้าบัญชีโดยต้องตรวจสอบหมายเลขบัญชีและจำนวนเงินฝาก คือ
-                # จำนวนเงินฝากต้องเป็นตัวเลขเท่านั้น
-                if (!is_numeric($depositAmount))
-                {
-                    $result->errorMessage = 'จำนวนเงินฝากต้องเป็นตัวเลขเท่านั้น';
-                    $canDeposit = false;
-                }
-
-                # จำนวนเงินฝากต้องเป็นตัวเป็นจำนวนเต็มเท่านั้น
-                if (((int) $depositAmount != $depositAmount) && $canDeposit)
-                {
-                    $result->errorMessage = 'จำนวนเงินฝากต้องเป็นจำนวนเต็มเท่านั้น';
-                    $canDeposit = false;
-                }
-                else
-                {
-                    $depositAmount = (int)$depositAmount;
-                }
-
-                # จำนวนเงินฝากต้องมากกว่า 0
-                if (($depositAmount <= 0) && $canDeposit)
-                {
-                    $result->errorMessage = 'จำนวนเงินฝากต้องมากกว่า 0 บาท';
-                    $canDeposit = false;
-                }
-
-                # จำนวนเงินฝากต้องไม่เกิน 100,000 บาท
-                if (($depositAmount > 100000) && $canDeposit)
-                {
-                    $result->errorMessage = 'จำนวนเงินฝากในแต่ละครั้งต้องไม่เกิน 100,000 บาท';
-                    $canDeposit = false;
-                }
-
                 # หมายเลขบัญชีมีในฐานข้อมูลระบบหรือไม่ผ่านบริการServiceAuthentication + ดึงยอดล่าสุด
-                $seviceAuthData = $this->getServiceAuthen($this->accNo);
+                //$serviceAuth = new ServiceAuthenticationStub();
+                $serviceAuth = new ServiceAuthentication();
+                $seviceAuthData = $serviceAuth->accountAuthenticationProvider($this->accNo);
 
                 /*
                 var_dump($seviceAuthData);
@@ -78,26 +75,17 @@
                     $result->accountBalance = $seviceAuthData['accBalance'] + $depositAmount;
 
                     # เรียก Method DBConnection::saveTransaction ของพี่ TA
-                    $this->saveTransaction($result->accountNumber, $result->accountBalance);
+                    DBConnection::saveTransaction($result->accountNumber, $result->accountBalance);
                 }
             }
             catch(AccountInformationException $e) 
             {
                 $result->errorMessage = $e->getMessage();
             }
-            # Return ผลลัพธ์
+            # 6. Return ผลลัพธ์
             return $result;
         }
 
-        protected function getServiceAuthen(string $accNo): array
-        {
-            return ServiceAuthentication::accountAuthenticationProvider($accNo);
-        }
-
-        protected function saveTransaction(string $accNo, int $updatedBalance): bool
-        {
-            return DBConnection::saveTransaction($accNo, $updatedBalance);
-        }
         
     }
 

@@ -1,15 +1,15 @@
 <?php 
 
 require('ServiceType.php');
-require('BillPayment.php');
+require('billpayment.php');
 
 class MainDriver 
 {
-    public static function payBill() 
+    public static function pay() 
 	{ 
-		Billing::payBill( ServiceType::ELECTRIC_BILLING, '4235750021' );        
+		BillPayment::pay( ServiceType::ELECTRIC_BILLING, '4235750021' );        
     }
 };
 
 //	Call driver to pay bill
-MainDriver::payBill();
+MainDriver::pay();

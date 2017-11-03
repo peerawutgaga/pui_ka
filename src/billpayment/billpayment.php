@@ -8,10 +8,10 @@ require_once 'Charge.php';
 require_once 'ChargeStub.php';
 require_once 'DBConnection.php';
 
-class Billing
+class BillPayment
 {
 	
-    public static function payBill( $serviceType, $accNo )
+    public static function pay( $serviceType, $accNo )
 	{    
 		DBConnection::restore();
 		
