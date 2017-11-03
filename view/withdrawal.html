@@ -36,7 +36,7 @@
     }
 </style>
 
-<body onload="loadCustInfo()">
+<body>
     <header class="header">
         <nav class="navbar" style="background: #ef5285">
             <div class="container-fluid">
@@ -59,7 +59,7 @@
                         </li>
                         <!-- Logout    -->
                         <li class="nav-item">
-                            <a id="logoutBtn" href="#" class="nav-link logout" onclick="logout()">ออกจากระบบ
+                            <a id="logoutBtn" href="#" class="nav-link logout">ออกจากระบบ
                                 <i class="fa fa-sign-out"></i>
                             </a>
                         </li>
@@ -73,7 +73,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
-                        <a id="backBtn" href="../main" class="btn btn-secondary">
+                        <a id="backBtn" href="../view/main.html" class="btn btn-secondary">
                             <i class="fa fa-reply"></i> ย้อนกลับ</a>
                     </div>
                 </div>
@@ -97,7 +97,7 @@
                                         <label class="col-sm-2 form-control-label">จำนวนเงิน
                                         </label>
                                         <div class="col-sm-6">
-                                            <input id="amount" name="withdrawAmount" type="number" min="1" class="form-control form-control-warning" required>
+                                            <input id="amount" type="number" min="1" class="form-control form-control-warning" required>
                                             <small class="form-text"></small>
                                         </div>
                                     </div>
@@ -115,7 +115,6 @@
         </section>
     </div>
     <!-- Javascript files-->
-    <script src="../lib/js/cookie-mgmt.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="../lib/js/tether.min.js"></script>
     <script src="../lib/js/bootstrap.min.js"></script>
@@ -123,79 +122,6 @@
     <script src="../lib/js/jquery.validate.min.js"></script>
     <script src="../lib/js/front.js"></script>
     <script src="../lib/js/sweetalert2.js"></script>
-    <script type="text/javascript">
-
-        function loadCustInfo() {
-            var acctNum = readCookie("authentication");
-            if (acctNum) {
-                $("#accNo").text(acctNum.replace(/(\d{1})\-?(\d{3})\-?(\d{3})\-?(\d{3})/, '$1-$2-$3-$4'));
-
-                $.ajax({
-                        method: "POST",
-                        url: "../src/controller.php",
-                        dataType: "json",
-                        data: {
-                            service: "ServiceAuthentication",
-                        }
-                    })
-                    .done(function(result) {
-                        if (result.isError) {
-                            swal('ผิดพลาด', result.message.toString(), 'error');
-                            $("#accBalance").text(result.message.toString());
-                            $("#accName").text(result.message.toString());
-                        } else {
-                            $("#accBalance").text(commaSeparateNumber(result.accBalance));
-                            $("#accName").text(result.accName.toString());
-                        }
-                    }).fail(function(xhr, status, error) {
-                        swal('ผิดพลาด', error, 'error');
-                    });
-            }
-        }
-
-        function commaSeparateNumber(val) {
-            while (/(\d+)(\d{3})/.test(val.toString())) {
-                val = val.toString().replace(/(\d+)(\d{3})/, '$1' + ',' + '$2');
-            }
-            return val;
-        }
-
-        $("#withdrawalForm").submit(function(event) {
-            swal({
-                title: 'ถอนเงิน',
-                text: "ถอนเงินจากบัญชี " + $("#accNo").text().replace(/(\d{1})\-?(\d{3})\-?(\d{3})\-?(\d{3})/, '$1-$2-$3-$4') + " (" + $("#accName").text() + ") เป็นจำนวนเงิน " + commaSeparateNumber($("#amount").val()) + " บาท",
-                type: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'ยืนยัน',
-                cancelButtonText: 'ยกเลิก'
-            }).then(function () {
-                $.ajax({
-                method: "POST",
-                url: "../src/controller.php",
-                dataType: "json",
-                data: {
-                service:"Withdraw",
-                transaction: {
-                    amount: $("#amount").val()
-                }
-            }
-            })
-            .done(function (result) {
-                if (result.isError) {
-                    swal('ผิดพลาด', result.message, 'error');
-                }
-                else {
-                    swal('ถอนเงินเรียบร้อย', 'ยอดเงินคงเหลือ = ' + commaSeparateNumber(JSON.stringify(result.data['accountBalance'])) + " บาท", 'success');
-                    loadCustInfo();
-                    $("#amount").val('');
-                }
-            }).fail(function(xhr, status, error) {
-                swal('ผิดพลาด', error, 'error');
-            });
-        })
-
-        event.preventDefault(); });
-
-    </script>
 </body>
+
 </html>

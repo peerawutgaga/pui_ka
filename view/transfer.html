@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -33,13 +32,13 @@
     .pink {
         color: #ef5285;
     }
-    
+
     .bg-pink {
         background: #ef5285;
     }
 </style>
 
-<body onload="loadCustInfo()">
+<body>
     <header class="header">
         <nav class="navbar" style="background: #ef5285">
             <div class="container-fluid">
@@ -91,11 +90,10 @@
                             </div>
                             <div class="card-body">
                                 <p>โอนเงินจากบัญชีหมายเลข :
-                                    <span class="pink"><span id="accSrcNo">accNo</span>
-                                    <!--(<span id="accName">accName</span>)--></span>
+                                        <span class="pink"><span id="accNo">accNo</span> (<span id="accName">accName</span>)</span>
                                 </p>
-                                <!--<p>ยอดเงินคงเหลือ:
-                                    <span id="accBalance" class="pink">accBalance</span> บาท</p>-->
+                                <p>ยอดเงินคงเหลือ:
+                                        <span id="accBalance" class="pink">accBalance</span> บาท</p>
                                 <p>ไปยัง</p>
                                 <form id="transferForm" class="form-horizontal">
                                     <div class="form-group row">
@@ -131,7 +129,6 @@
         </section>
     </div>
 
-    <script src="../lib/js/cookie-mgmt.js"></script>
     <!-- Javascript files-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="../lib/js/tether.min.js"></script>
@@ -140,103 +137,5 @@
     <script src="../lib/js/jquery.validate.min.js"></script>
     <script src="../lib/js/front.js"></script>
     <script src="../lib/js/sweetalert2.js"></script>
-
-    <script type="text/javascript">
-        function loadCustInfo() {
-            var acctNum = readCookie("authentication");
-            if (acctNum) {
-                $("#accSrcNo").data("accNo", acctNum);
-                $("#accSrcNo").text(acctNum.toString().replace(/(\d{1})\-?(\d{3})\-?(\d{3})\-?(\d{3})/, '$1-$2-$3-$4'));
-
-                /*$.ajax({
-                        method: "POST",
-                        url: "../src/controller.php",
-                        dataType: "json",
-                        data: {
-                            service: "ServiceAuthentication",
-                        }
-                    })
-                    .done(function(result) {
-                        if (result.isError) {
-                            $("#accBalance").text(result.message.toString());
-                            $("#accName").text(result.message.toString());
-                        } else {
-                            $("#accBalance").text(commaSeparateNumber(result.accBalance));
-                            $("#accName").text(result.accName.toString());
-                        }
-                    }).fail(function(xhr, status, error) {
-                        swal(
-                            'ผิดพลาด',
-                            error,
-                            'error'
-                        );
-                    });*/
-            }
-        }
-
-        function commaSeparateNumber(val) {
-            while (/(\d+)(\d{3})/.test(val.toString())) {
-                val = val.toString().replace(/(\d+)(\d{3})/, '$1' + ',' + '$2');
-            }
-            return val;
-        }
-
-        $("#transferForm").submit(function(event) {
-            swal({
-                title: 'โอนเงิน',
-                text: "โอนเงินจากบัญชี " + $("#accSrcNo").data("accNo").toString().replace(/(\d{1})\-?(\d{3})\-?(\d{3})\-?(\d{3})/, '$1-$2-$3-$4') +
-                    " (" /*+ $("#accName").text() */ + ") ไปยังบัญชี " +
-                    $("#accDesNo").val().toString().replace(/(\d{1})\-?(\d{3})\-?(\d{3})\-?(\d{3})/, '$1-$2-$3-$4') +
-                    " เป็นจำนวนเงิน " + commaSeparateNumber($("#amount").val()) + " บาท",
-                type: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'ยืนยัน',
-                cancelButtonText: 'ยกเลิก'
-            }).then(function() {
-                $.ajax({
-                        method: "POST",
-                        url: "../src/controller.php",
-                        dataType: "json",
-                        data: {
-                            service: "Transfer",
-                            transaction: {
-                                srcNumber: $("#accSrcNo").data("accNo"),
-                                /*srcName: $("#accName").text(),*/
-                                targetNumber: $("#accDesNo").val(),
-                                amount: $("#amount").val()
-                            }
-                        }
-                    })
-                    .done(function(data) {
-                        console.log(data);
-                        if (data.errorMessage) {
-                            swal(
-                                'ผิดพลาด',
-                                data.errorMessage,
-                                'error'
-                            );
-                        } else {
-                            swal(
-                                'โอนเงินเรียบร้อย',
-                                'ยอดเงินคงเหลือ = ' + commaSeparateNumber(data.accountBalance) + " บาท",
-                                'success'
-                            );
-                            $("#accDesNo").val('');
-                            $("#amount").val('');
-                        }
-                    })
-                    .fail(function(xhr, status, error) {
-                        swal(
-                            'ผิดพลาด',
-                            error,
-                            'error'
-                        );
-                    });;
-            });
-
-            event.preventDefault();
-        });
-    </script>
 </body>
-
 </html>

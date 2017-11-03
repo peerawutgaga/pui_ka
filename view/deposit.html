@@ -38,7 +38,7 @@
     }
 </style>
 
-<body onload="loadCustInfo()">
+<body>
     <header class="header">
         <nav class="navbar" style="background: #ef5285">
             <div class="container-fluid">
@@ -61,7 +61,7 @@
                         </li>
                         <!-- Logout    -->
                         <li class="nav-item">
-                            <a id="logoutBtn" href="#" class="nav-link logout" onclick="logout()">ออกจากระบบ
+                            <a id="logoutBtn" href="#" class="nav-link logout">ออกจากระบบ
                                 <i class="fa fa-sign-out"></i>
                             </a>
                         </li>
@@ -90,10 +90,10 @@
                             </div>
                             <div class="card-body">
                                 <p>เข้าบัญชีหมายเลข :
-                                    <span class="pink"> <span id="accNo">5971005021</span> (<span id="accName">PingkungaA</span>) </span>
+                                    <span class="pink"> <span id="accNo">accNo</span> (<span id="accName">accName</span>) </span>
                                 </p>
                                 <p>ยอดเงินคงเหลือ :
-                                    <span id="accBalance" class="pink">5000</span> บาท
+                                    <span id="accBalance" class="pink">accBalance</span> บาท
                                 </p>
                                 <form id="depositForm" class="form-horizontal">
                                     <div class="form-group row">
@@ -126,131 +126,5 @@
     <script src="../lib/js/jquery.validate.min.js"></script>
     <script src="../lib/js/front.js"></script>
     <script src="../lib/js/sweetalert2.js"></script>
-    <script src="../lib/js/cookie-mgmt.js"></script>
-    <script type="text/javascript">
-        function loadCustInfo() {
-            var acctNum = readCookie("authentication");
-            //alert(acctNum);
-            if (acctNum) {
-                $("#accNo").data("accNo", acctNum);
-                $("#accNo").text(acctNum.toString().replace(/(\d{1})\-?(\d{3})\-?(\d{3})\-?(\d{3})/, '$1-$2-$3-$4'));
-
-                $.ajax({
-                        method: "POST",
-                        url: "../src/controller.php",
-                        dataType: "json",
-                        data: {
-                            service: "ServiceAuthentication",
-                        }
-                    })
-                    .done(function(result) {
-                        console.log(result);
-                        if (result.isError) {
-                            $("#accBalance").text(result.message.toString());
-                            $("#accName").text(result.message.toString());
-                        } else {
-                            $("#accBalance").text(commaSeparateNumber(result.accBalance));
-                            $("#accName").text(result.accName.toString());
-                        }
-                    }).fail(function(xhr, textStatus, errorThrown) {
-                        swal(
-                            'ผิดพลาด',
-                            'ข้อผิดพลาด ' + textStatus + ' : ' + errorThrown,
-                            'error'
-                        );
-                    });
-            }
-        }
-
-        $( "#depositForm" ).submit(function( event ) {
-            swal({
-                title: 'ฝากเงิน',
-                html: 'ฝากเงินเข้าบัญชี <br/>' +
-                     $("#accNo").text() +' ('+ $("#accName").text() +') '+'<br/>' +
-                     ' เป็นจำนวนเงิน ' + $("#amount").val() + ' บาท',
-                type: 'info',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'ยืนยัน',
-                cancelButtonText: 'ยกเลิก',
-                confirmButtonClass: 'btn btn-success',
-                cancelButtonClass: 'btn btn-danger',
-                buttonsStyling: false
-            }).then(function () {
-                //alert(base_url());
-                $.ajax({
-                    method: "POST",
-                    //url: "/../../src/deposit/DepositController.php",
-                    //For stub
-                    //url: base_url() + "src/deposit/DepositController.php",
-                    //For Intergation test with main
-                    url: "../src/controller.php",
-                    dataType: "json",
-                    /*
-                    data: {
-                            accNo: $("#accNo").data("accNo")
-                          , depositAmount: $("#amount").val()
-                          },
-                    */
-                    data: {
-                            service: "Deposit",
-                            transaction: {
-                                  accNo: $("#accNo").data("accNo")
-                                , amount: $("#amount").val()
-                            }
-                          },
-                    success: function(data) {
-					    //alert("accountBalance: " + data.accountBalance + "|accountNumber: " + data.accountNumber + "|message: " + data.errorMessage);
-                        console.log(data)
-
-                        if (data.isError)
-                        {
-                            swal('เกิดข้อผิดพลาด!', data.message, 'error');
-                        }
-                        else
-                        {
-                            swal('ฝากเงินเรียบร้อย!', 'ยอดเงินคงเหลือ = ' + commaSeparateNumber(JSON.stringify(data.data['accountBalance'])) +' บาท', "success");
-                            loadCustInfo();
-                            $("#amount").val("");
-                        }
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        console.log(JSON.stringify(jqXHR));
-                        swal('เกิดข้อผิดพลาด!', 'ข้อผิดพลาด ' + textStatus + ' : ' + errorThrown, "error");
-                    }
-                })
-            }, function (dismiss) {
-                if (dismiss === 'cancel') {
-                    swal(
-                        'ยกเลิก',
-                        'ท่านได้ยกเลิกการทำรายการ',
-                        'error'
-                    )
-                }
-            })
-
-            event.preventDefault();
-        });
-
-        function commaSeparateNumber(val) {
-            while (/(\d+)(\d{3})/.test(val.toString())) {
-                val = val.toString().replace(/(\d+)(\d{3})/, '$1' + ',' + '$2');
-            }
-            return val;
-        }
-
-        //จริงๆ ควรทำ Base Path
-        function base_url() {
-            var pathparts = location.pathname.split('/');
-            if ((location.host == 'localhost')
-             || (location.host == 'warroom.debuggingsoft.com')){
-                var url = location.origin+'/'+pathparts[1].trim('/')+'/'; // http://localhost/myproject/
-            }else{
-                var url = location.origin+'/'; // http://stackoverflow.com
-            }
-            return url;
-        }
-    </script>
 </body>
 </html>

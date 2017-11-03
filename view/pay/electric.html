@@ -137,6 +137,40 @@
     <script src="../../lib/js/jquery.validate.min.js"></script>
     <script src="../../lib/js/front.js"></script>
     <script src="../../lib/js/sweetalert2.js"></script>
+	
+	<script type="text/javascript">
+		window.onload = function () {
+			/*var url = document.location.href,
+				params = url.split('?')[1].split('&'),
+				data = {}, tmp;
+			for (var i = 0, l = params.length; i < l; i++) {
+				 tmp = params[i].split('=');
+				 data[tmp[0]] = tmp[1];
+			}
+			document.getElementById('charge').innerHTML = data.val;
+			*/
+			var accountNumber = "";
+			var chargeType = "";
+			var chargeAmount = 0;
+			
+			var result = document.cookie;
+			var cookieArray = result.split(";");
+			for(var i=0;i<cookieArray.length;i++){
+			   var keyValArr = cookieArray[i].split("=");
+			   if (i==0){
+					accountNumber = keyValArr[1].trim();
+			   }else if(i==1){
+			        chargeType = keyValArr[1].trim();
+			   }else if(i==2){
+			        chargeAmount = parseInt(keyValArr[1].trim());
+			   }
+			   document.cookie=keyValArr[0]+"=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+			}
+			
+			document.getElementById('charge').innerHTML = chargeAmount;
+			
+		}
+	</script>
 </body>
 
 </html>
